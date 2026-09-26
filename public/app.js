@@ -108,10 +108,11 @@ async function openTrack(track) {
     currentData = j;
     const a = j.audio;
 
-    if (a?.download_url) {
-      audio.src = a.download_url;
-      audio.load();
-    }
+    const audioUrl = a?.stream_url || a?.direct_url || a?.download_url;
+    if (!audioUrl) throw new Error("SpotSaver tidak mengembalikan URL MP3.");
+
+    audio.src = audioUrl;
+    audio.load();
 
     if (a?.thumbnail) $("cover").src = a.thumbnail;
     $("title").textContent = a?.title || track.name;
@@ -119,7 +120,7 @@ async function openTrack(track) {
     $("album").textContent = a?.album || track.album?.name || "";
 
     renderLyrics(j.lyrics);
-    setStatus("Siap diputar.");
+    setStatus("Audio SpotSaver siap. Tekan Play.");
   } catch (e) {
     lyricsEl.innerHTML = `<div class="empty">${esc(e.message)}</div>`;
     setStatus(e.message);
@@ -197,4 +198,18 @@ seek.addEventListener("input", () => {
 searchBtn.addEventListener("click", search);
 queryEl.addEventListener("keydown", e => {
   if (e.key === "Enter") search();
+});
+
+
+audio.addEventListener("error", () => {
+  const code = audio.error?.code;
+  const msg = code === 4
+    ? "Browser tidak dapat memutar URL MP3 SpotSaver."
+    : "Gagal memuat audio SpotSaver.";
+  setStatus(msg);
+});
+
+audio.addEventListener("loadedmetadata", () => {
+  $("total").textContent = fmt(audio.duration * 1000);
+  setStatus("Audio SpotSaver berhasil dimuat.");
 });
