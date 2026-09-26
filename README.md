@@ -33,8 +33,19 @@ media seeking.
 ## Catatan
 
 Proxy `/api/stream` hanya menerima HTTPS dari host media yang diizinkan
-(SpotSaver/Google Video/Googleusercontent) untuk mengurangi risiko endpoint
-proxy dipakai sebagai open proxy.
+(SpotSaver/Google Video/Googleusercontent/dlsrv.online). SpotSaver versi saat ini
+dapat mengembalikan `downloadUrl`, `mediaUrl`, atau `url`; ketiganya sudah
+dinormalisasi oleh `lib/spotsaver.js`. Ini juga mengatasi respons seperti:
+
+```json
+{
+  "success": 1,
+  "status": "tunnel",
+  "downloadUrl": "https://yt1s-worker-5.dlsrv.online/tunnel?...",
+  "mediaUrl": "https://yt1s-worker-5.dlsrv.online/tunnel?...",
+  "url": "https://yt1s-worker-5.dlsrv.online/tunnel?..."
+}
+```
 
 Audio tetap bersumber dari URL yang diberikan SpotSaver; project ini tidak
 menyimpan file MP3.
