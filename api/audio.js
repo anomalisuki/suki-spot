@@ -1,5 +1,11 @@
 const { getAudio } = require("../lib/spotsaver");
 
+function proxyUrl(req, source) {
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  return `${proto}://${host}/api/stream?src=${encodeURIComponent(source)}`;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== "GET") {
     return res.status(405).json({ status: false, message: "Method not allowed" });
@@ -19,7 +25,11 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       creator: "xDonzCode",
       status: "success",
-      data
+      data: {
+        ...data,
+        direct_url: data.download_url,
+        stream_url: proxyUrl(req, data.download_url)
+      }
     });
   } catch (e) {
     return res.status(502).json({
