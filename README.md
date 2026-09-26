@@ -1,42 +1,40 @@
-# Suki Lyrics — Vercel Hobby
+# Suki Lyrics — Vercel Hobby (fixed audio)
 
-Web music player yang menggabungkan:
+Versi ini memperbaiki masalah audio yang tidak mau dimainkan ketika URL MP3
+SpotSaver tidak bisa diputar langsung oleh browser karena perbedaan CORS,
+Range request, atau header media.
 
-- Spotify Pathfinder untuk pencarian track
-- LRCLIB untuk plain/synced lyrics
-- SpotSaver untuk mendapatkan URL MP3
-- HTML5 Audio + auto-scroll synced lyrics
+## Alur
 
-## Deploy ke Vercel
+Spotify Pathfinder → pilih track → SpotSaver → MP3 URL → `/api/stream` →
+HTML5 Audio → LRCLIB synced lyrics.
 
-1. Upload project ini ke GitHub.
-2. Import repository ke Vercel.
-3. Framework Preset: Other.
-4. Build Command: kosongkan.
-5. Output Directory: kosongkan.
-6. Deploy.
-
-Tidak perlu menjalankan `npm run build`.
+`/api/stream` meneruskan request `Range` dari browser ke sumber audio sehingga
+seek/progress audio dapat bekerja seperti media biasa.
 
 ## Endpoint
 
 ```text
-GET /api/search?q=nama%20lagu
-GET /api/lyrics?track=judul&artist=artis
+GET /api/search?q=...
+GET /api/lyrics?track=...&artist=...
 GET /api/audio?url=https://open.spotify.com/track/...
 GET /api/track?url=https://open.spotify.com/track/...
+GET /api/stream?src=<SpotSaver audio URL>
 ```
 
-`/api/track` menggabungkan audio SpotSaver dan lyrics LRCLIB.
+## Deploy
 
-## Environment Variable (opsional)
+Import repository ke Vercel. Framework `Other`; tidak membutuhkan build command.
 
-```text
-SPOTIFY_TOTP_SECRET
-```
-
-Jika tidak diisi, project menggunakan nilai yang ada pada script sumber.
+Project menggunakan Node.js serverless functions. Vercel mendukung streaming
+response pada Node.js Functions. Range header juga diteruskan untuk kebutuhan
+media seeking.
 
 ## Catatan
 
-URL audio yang dikembalikan SpotSaver diputar langsung oleh browser. Vercel tidak mem-proxy file MP3 sehingga Function tidak dipakai untuk streaming file audio.
+Proxy `/api/stream` hanya menerima HTTPS dari host media yang diizinkan
+(SpotSaver/Google Video/Googleusercontent) untuk mengurangi risiko endpoint
+proxy dipakai sebagai open proxy.
+
+Audio tetap bersumber dari URL yang diberikan SpotSaver; project ini tidak
+menyimpan file MP3.
