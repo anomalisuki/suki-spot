@@ -6,7 +6,9 @@ function allowedHost(hostname) {
     h === "googlevideo.com" ||
     h.endsWith(".googlevideo.com") ||
     h === "googleusercontent.com" ||
-    h.endsWith(".googleusercontent.com")
+    h.endsWith(".googleusercontent.com") ||
+    h === "dlsrv.online" ||
+    h.endsWith(".dlsrv.online")
   );
 }
 
