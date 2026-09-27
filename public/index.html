@@ -1,63 +1,34 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b0b0f">
-  <title>Suki Lyrics</title>
-  <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000"><title>Suki Spot</title><link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">
-        <div class="logo">♪</div>
-        <div>
-          <h1>Suki Lyrics</h1>
-          <p>Spotify search · synced lyrics · MP3 player</p>
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <section class="searchbox">
-        <input id="query" autocomplete="off" placeholder="Cari lagu atau artis...">
-        <button id="searchBtn">Cari</button>
-      </section>
-
-      <div id="status" class="status"></div>
-
-      <section id="results" class="results"></section>
-
-      <section id="player" class="player hidden">
-        <div class="now">
-          <img id="cover" src="" alt="">
-          <div>
-            <h2 id="title">-</h2>
-            <p id="artist">-</p>
-            <span id="album">-</span>
-          </div>
-        </div>
-
-        <audio id="audio" controls preload="none"></audio>
-
-        <div class="progress-row">
-          <span id="current">0:00</span>
-          <input id="seek" type="range" min="0" max="100" value="0">
-          <span id="total">0:00</span>
-        </div>
-
-        <div id="lyrics" class="lyrics">
-          <div class="empty">Pilih lagu untuk memuat lirik.</div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <span>Lyrics: LRCLIB</span>
-      <span>Audio: SpotSaver</span>
-    </footer>
-  </div>
-  <script src="/app.js"></script>
-</body>
-</html>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">●</span><span>Suki Spot</span></div>
+    <nav><button class="nav active">⌂ <span>Beranda</span></button><button class="nav" id="focusSearch">⌕ <span>Cari</span></button></nav>
+    <div class="library-title">PERPUSTAKAAN</div>
+    <div class="library-item">♫ Lagu</div><div class="library-item">♡ Favorit</div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><button class="circle">‹</button><button class="circle">›</button><div class="top-search"><span>⌕</span><input id="query" autocomplete="off" placeholder="Apa yang ingin kamu putar?"><button id="searchBtn">Cari</button></div></header>
+    <div id="status" class="status"></div>
+    <section class="content"><h1>Selamat datang</h1><div id="results" class="results"></div></section>
+  </main>
+  <section id="player" class="player hidden">
+    <div class="player-main">
+      <img id="cover" src="" alt=""><div class="track-meta"><strong id="title">-</strong><span id="artist">-</span></div>
+      <button id="like" class="icon-btn">♡</button>
+    </div>
+    <div class="controls">
+      <button id="prev" class="control">↶</button><button id="playBtn" class="play">▶</button><button id="next" class="control">↷</button>
+    </div>
+    <div class="bar"><span id="current">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="total">0:00</span></div>
+    <audio id="audio" preload="metadata"></audio>
+  </section>
+  <section id="lyricsPanel" class="lyrics-panel hidden"><div class="lyrics-head"><span>LYRICS</span><button id="closeLyrics">×</button></div><div id="lyrics" class="lyrics"><div class="empty">Pilih lagu.</div></div></section>
+</div>
+<script src="/app.js"></script>
+</body></html>
