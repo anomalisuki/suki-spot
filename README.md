@@ -1,18 +1,9 @@
-# Suki Music — UI v3
+# Suki v3 — Exact music-main UI + Suki v3 API
 
-UI modern mengikuti gaya `music-main`, tetapi API/backend dan library utama berasal dari `suki-v3`.
+Frontend UI is copied from `music-main` without redesigning its visual layer.
+Backend libraries are from `suki-v3`.
 
-## API yang dipakai
-- GET /api/search?q=...
-- GET /api/track?url=https://open.spotify.com/track/...
-- GET /api/audio?url=...
-- GET /api/lyrics?track=...&artist=...
-- GET /api/stream?src=...
+Compatibility endpoints under `/api/nanz/*` adapt the Suki v3 response to the exact frontend contract.
+Original Suki API is also available under `/api/suki/*`.
 
-Tidak memakai endpoint `/api/nanz/*` dari proyek referensi.
-
-## Deploy
-1. Upload repository/ZIP ke GitHub.
-2. Import project ke Vercel.
-3. Install dependency `npm install`.
-4. Deploy.
+Deploy to Vercel: import the project, install dependencies, then deploy.
