@@ -1,51 +1,20 @@
-# Suki Lyrics — Vercel Hobby (fixed audio)
+# Suki Spot
 
-Versi ini memperbaiki masalah audio yang tidak mau dimainkan ketika URL MP3
-SpotSaver tidak bisa diputar langsung oleh browser karena perbedaan CORS,
-Range request, atau header media.
+Spotify-style music UI with Spotify search, LRCLIB synced lyrics, and audio supplied by the requested downloader API.
 
-## Alur
+## Downloader
+The old SpotSaver flow has been removed. Audio now comes entirely from:
 
-Spotify Pathfinder → pilih track → SpotSaver → MP3 URL → `/api/stream` →
-HTML5 Audio → LRCLIB synced lyrics.
+`https://api.ikyyxd.my.id/download/spotifydl?url=<spotify_url>`
 
-`/api/stream` meneruskan request `Range` dari browser ke sumber audio sehingga
-seek/progress audio dapat bekerja seperti media biasa.
+The API response field `result.download` is preserved as `download_url` / `link_download_aktif` and used as the audio source. The Vercel `/api/stream` endpoint proxies that signed URL and forwards HTTP Range requests for HTML5 audio seeking.
 
-## Endpoint
+## Lyrics synchronization
+LRCLIB provides timestamped lines. The browser compares `audio.currentTime` with each line's `startMs`, highlights the active line, and scrolls it into view. Clicking a lyric seeks the audio to that timestamp.
 
-```text
-GET /api/search?q=...
-GET /api/lyrics?track=...&artist=...
-GET /api/audio?url=https://open.spotify.com/track/...
-GET /api/track?url=https://open.spotify.com/track/...
-GET /api/stream?src=<SpotSaver audio URL>
-```
+Browser autoplay policies mean the user may need to press Play; once audio is playing, lyrics follow the same audio clock.
 
 ## Deploy
+Import this folder into Vercel and deploy. The app uses native Node.js `fetch`; no extra downloader package is required.
 
-Import repository ke Vercel. Framework `Other`; tidak membutuhkan build command.
-
-Project menggunakan Node.js serverless functions. Vercel mendukung streaming
-response pada Node.js Functions. Range header juga diteruskan untuk kebutuhan
-media seeking.
-
-## Catatan
-
-Proxy `/api/stream` hanya menerima HTTPS dari host media yang diizinkan
-(SpotSaver/Google Video/Googleusercontent/dlsrv.online). SpotSaver versi saat ini
-dapat mengembalikan `downloadUrl`, `mediaUrl`, atau `url`; ketiganya sudah
-dinormalisasi oleh `lib/spotsaver.js`. Ini juga mengatasi respons seperti:
-
-```json
-{
-  "success": 1,
-  "status": "tunnel",
-  "downloadUrl": "https://yt1s-worker-5.dlsrv.online/tunnel?...",
-  "mediaUrl": "https://yt1s-worker-5.dlsrv.online/tunnel?...",
-  "url": "https://yt1s-worker-5.dlsrv.online/tunnel?..."
-}
-```
-
-Audio tetap bersumber dari URL yang diberikan SpotSaver; project ini tidak
-menyimpan file MP3.
+Use the audio only for content you are permitted to access/use.
