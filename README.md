@@ -1,20 +1,18 @@
-# Suki Spot
+# Suki Music — UI v3
 
-Spotify-style music UI with Spotify search, LRCLIB synced lyrics, and audio supplied by the requested downloader API.
+UI modern mengikuti gaya `music-main`, tetapi API/backend dan library utama berasal dari `suki-v3`.
 
-## Downloader
-The old SpotSaver flow has been removed. Audio now comes entirely from:
+## API yang dipakai
+- GET /api/search?q=...
+- GET /api/track?url=https://open.spotify.com/track/...
+- GET /api/audio?url=...
+- GET /api/lyrics?track=...&artist=...
+- GET /api/stream?src=...
 
-`https://api.ikyyxd.my.id/download/spotifydl?url=<spotify_url>`
-
-The API response field `result.download` is preserved as `download_url` / `link_download_aktif` and used as the audio source. The Vercel `/api/stream` endpoint proxies that signed URL and forwards HTTP Range requests for HTML5 audio seeking.
-
-## Lyrics synchronization
-LRCLIB provides timestamped lines. The browser compares `audio.currentTime` with each line's `startMs`, highlights the active line, and scrolls it into view. Clicking a lyric seeks the audio to that timestamp.
-
-Browser autoplay policies mean the user may need to press Play; once audio is playing, lyrics follow the same audio clock.
+Tidak memakai endpoint `/api/nanz/*` dari proyek referensi.
 
 ## Deploy
-Import this folder into Vercel and deploy. The app uses native Node.js `fetch`; no extra downloader package is required.
-
-Use the audio only for content you are permitted to access/use.
+1. Upload repository/ZIP ke GitHub.
+2. Import project ke Vercel.
+3. Install dependency `npm install`.
+4. Deploy.
