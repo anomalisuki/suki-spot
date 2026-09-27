@@ -1,89 +1,48 @@
 function allowedHost(hostname) {
-  const h = String(hostname || "").toLowerCase();
-  return (
-    h === "spotsaver.net" ||
-    h.endsWith(".spotsaver.net") ||
-    h === "googlevideo.com" ||
-    h.endsWith(".googlevideo.com") ||
-    h === "googleusercontent.com" ||
-    h.endsWith(".googleusercontent.com") ||
-    h === "dlsrv.online" ||
-    h.endsWith(".dlsrv.online")
-  );
+  const h = hostname.toLowerCase();
+  return h === "cdn-spotify.zm.io.vn" || h.endsWith(".zm.io.vn");
 }
 
 module.exports = async (req, res) => {
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    return res.status(405).end();
-  }
-
-  const src = String(req.query.src || "").trim();
-  if (!src) return res.status(400).send("Missing src");
+  if (!['GET', 'HEAD'].includes(req.method)) return res.status(405).end();
+  const src = String(req.query.src || "");
+  if (!src) return res.status(400).json({ status: false, message: "src wajib diisi" });
 
   let target;
-  try {
-    target = new URL(src);
-  } catch {
-    return res.status(400).send("Invalid source URL");
-  }
-
+  try { target = new URL(src); } catch { return res.status(400).json({ status: false, message: "URL audio tidak valid" }); }
   if (target.protocol !== "https:" || !allowedHost(target.hostname)) {
-    return res.status(403).send("Source host not allowed");
+    return res.status(403).json({ status: false, message: "Host audio tidak diizinkan" });
   }
 
-  const headers = {
-    "User-Agent": req.headers["user-agent"] || "Mozilla/5.0",
-    Accept: req.headers.accept || "*/*"
-  };
-
+  const headers = {};
   if (req.headers.range) headers.Range = req.headers.range;
+  headers["User-Agent"] = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/153.0.0.0 Mobile Safari/537.36";
+  headers.Accept = "audio/mpeg,audio/*;q=0.9,*/*;q=0.8";
 
   try {
-    const upstream = await fetch(target.toString(), {
-      method: req.method,
-      headers,
-      redirect: "follow"
-    });
-
-    const pass = [
-      "content-type",
-      "content-length",
-      "content-range",
-      "accept-ranges",
-      "cache-control",
-      "etag",
-      "last-modified"
-    ];
-
-    for (const key of pass) {
-      const value = upstream.headers.get(key);
-      if (value) res.setHeader(key, value);
+    const upstream = await fetch(target, { headers });
+    const out = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS",
+      "Cache-Control": "no-store"
+    };
+    for (const h of ["content-type","content-length","content-range","accept-ranges","etag","last-modified"]) {
+      const v = upstream.headers.get(h);
+      if (v) out[h] = v;
     }
-
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
-    res.setHeader("Accept-Ranges", upstream.headers.get("accept-ranges") || "bytes");
-
-    res.status(upstream.status);
-
+    res.writeHead(upstream.status, out);
     if (req.method === "HEAD" || !upstream.body) return res.end();
-
     const reader = upstream.body.getReader();
     try {
       while (true) {
-        const { done, value } = await reader.read();
+        const {done, value} = await reader.read();
         if (done) break;
         res.write(Buffer.from(value));
       }
-    } finally {
-      reader.releaseLock();
-    }
+    } finally { reader.releaseLock(); }
     res.end();
   } catch (e) {
-    if (!res.headersSent) {
-      res.status(502).send(`Audio upstream error: ${e.message}`);
-    } else {
-      res.end();
-    }
+    if (!res.headersSent) res.status(502).json({ status: false, message: `Audio upstream gagal: ${e.message}` });
+    else res.end();
   }
 };
