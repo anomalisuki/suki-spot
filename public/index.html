@@ -1,34 +1,98 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#000"><title>Suki Spot</title><link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#08090d">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/logo.png">
+<title>Suki Music</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#08090d;--card:#20222c;--card2:#282b38;--muted:#a0a5b0}
+html,body{margin:0;background:var(--bg);color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100dvh;overflow:hidden}
+.hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{scrollbar-width:none}
+.app-bg{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 50% -10%,#272a36 0,#0d0f15 35%,#08090d 72%)}
+.app-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,9,13,.1),rgba(8,9,13,.8))}
+.glass{background:rgba(32,34,44,.88);border:1px solid rgba(255,255,255,.09);box-shadow:0 12px 35px rgba(0,0,0,.35);backdrop-filter:blur(18px)}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.35);transition:.2s}
+.card:hover{background:var(--card2);border-color:rgba(255,255,255,.15)}
+.btn{background:#fff;color:#050507;font-weight:800;border-radius:999px;padding:.7rem 1rem;transition:.2s}.btn:active{transform:scale(.95)}
+.bottom-nav{background:rgba(18,20,27,.94);border:1px solid rgba(255,255,255,.1);box-shadow:0 -12px 40px rgba(0,0,0,.45);backdrop-filter:blur(22px)}
+.nav-item{color:#858b97}.nav-item.active{color:#fff}.nav-item.active .nav-dot{background:#fff;box-shadow:0 0 14px rgba(255,255,255,.4)}
+.nav-dot{width:5px;height:5px;border-radius:50%;margin-top:3px}
+.song-row{background:rgba(32,34,44,.92);border:1px solid rgba(255,255,255,.07)}
+.song-row.current{background:#303443;border-color:rgba(255,255,255,.22)}
+.full-bg{position:absolute;inset:-12%;width:124%;height:124%;object-fit:cover;filter:blur(35px) brightness(.38) saturate(1.15);opacity:.8}
+.full-vignette{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,6,9,.6),rgba(5,6,9,.25) 45%,rgba(5,6,9,.95))}
+.lyric-line{font-size:1.45rem;line-height:1.3;font-weight:800;color:rgba(255,255,255,.32);padding:9px 0;transition:.25s;cursor:pointer}
+.lyric-line.active{color:#fff;transform:scale(1.045);transform-origin:left}
+.mini{background:rgba(30,32,41,.95);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(20px);box-shadow:0 16px 45px rgba(0,0,0,.6)}
+input[type=range]{accent-color:#fff}
+@media(min-width:800px){#main{max-width:920px;margin:auto}.bottom-nav{max-width:620px;left:50%;transform:translateX(-50%);border-radius:22px;bottom:16px}.mini{max-width:560px;left:50%;transform:translateX(-50%);right:auto;width:calc(100% - 24px)}.lyric-line{font-size:1.9rem}}
+</style>
 </head>
 <body>
-<div class="layout">
-  <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">●</span><span>Suki Spot</span></div>
-    <nav><button class="nav active">⌂ <span>Beranda</span></button><button class="nav" id="focusSearch">⌕ <span>Cari</span></button></nav>
-    <div class="library-title">PERPUSTAKAAN</div>
-    <div class="library-item">♫ Lagu</div><div class="library-item">♡ Favorit</div>
-  </aside>
-  <main class="main">
-    <header class="topbar"><button class="circle">‹</button><button class="circle">›</button><div class="top-search"><span>⌕</span><input id="query" autocomplete="off" placeholder="Apa yang ingin kamu putar?"><button id="searchBtn">Cari</button></div></header>
-    <div id="status" class="status"></div>
-    <section class="content"><h1>Selamat datang</h1><div id="results" class="results"></div></section>
-  </main>
-  <section id="player" class="player hidden">
-    <div class="player-main">
-      <img id="cover" src="" alt=""><div class="track-meta"><strong id="title">-</strong><span id="artist">-</span></div>
-      <button id="like" class="icon-btn">♡</button>
-    </div>
-    <div class="controls">
-      <button id="prev" class="control">↶</button><button id="playBtn" class="play">▶</button><button id="next" class="control">↷</button>
-    </div>
-    <div class="bar"><span id="current">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="total">0:00</span></div>
-    <audio id="audio" preload="metadata"></audio>
-  </section>
-  <section id="lyricsPanel" class="lyrics-panel hidden"><div class="lyrics-head"><span>LYRICS</span><button id="closeLyrics">×</button></div><div id="lyrics" class="lyrics"><div class="empty">Pilih lagu.</div></div></section>
+<div class="app-bg"></div>
+<div id="splash" class="fixed inset-0 z-[999] bg-[#08090d] flex flex-col items-center justify-center transition-opacity duration-300">
+  <div class="w-28 h-28 rounded-full overflow-hidden border border-white/20 shadow-2xl"><img src="/logo.png" class="w-full h-full object-cover"></div>
+  <b class="mt-5 text-lg tracking-wide">Suki Music</b><span class="text-[10px] text-white/40 uppercase tracking-[.25em] mt-2">Menyiapkan musikmu</span>
 </div>
+
+<main id="main" class="h-[100dvh] overflow-y-auto hide-scrollbar pb-44">
+  <section id="homeView"></section>
+  <section id="searchView" class="hidden"></section>
+  <section id="libraryView" class="hidden"></section>
+  <section id="likedView" class="hidden"></section>
+  <section id="profileView" class="hidden"></section>
+</main>
+
+<div id="mini" class="mini hidden fixed left-3 right-3 bottom-[82px] z-[130] rounded-2xl p-2.5">
+  <div class="flex items-center gap-3">
+    <img id="miniCover" class="w-12 h-12 rounded-xl object-cover">
+    <div class="min-w-0 flex-1"><div id="miniTitle" class="font-bold text-sm truncate"></div><div id="miniArtist" class="text-[11px] text-white/55 truncate mt-0.5"></div></div>
+    <button id="miniLike" class="p-2 text-white/60"><i data-lucide="heart" class="w-5 h-5"></i></button>
+    <button id="miniPlay" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center"><i data-lucide="play" class="w-4 h-4 fill-current"></i></button>
+  </div>
+</div>
+
+<nav class="bottom-nav fixed left-3 right-3 bottom-3 z-[120] rounded-2xl px-2 py-2 flex justify-around">
+  <button class="nav-item active flex flex-col items-center p-2 min-w-[60px]" data-view="home"><i data-lucide="house" class="w-5 h-5"></i><span class="text-[10px] mt-1 font-semibold">Beranda</span><i class="nav-dot"></i></button>
+  <button class="nav-item flex flex-col items-center p-2 min-w-[60px]" data-view="search"><i data-lucide="search" class="w-5 h-5"></i><span class="text-[10px] mt-1 font-semibold">Cari</span><i class="nav-dot"></i></button>
+  <button class="nav-item flex flex-col items-center p-2 min-w-[60px]" data-view="library"><i data-lucide="library" class="w-5 h-5"></i><span class="text-[10px] mt-1 font-semibold">Library</span><i class="nav-dot"></i></button>
+  <button class="nav-item flex flex-col items-center p-2 min-w-[60px]" data-view="liked"><i data-lucide="heart" class="w-5 h-5"></i><span class="text-[10px] mt-1 font-semibold">Disukai</span><i class="nav-dot"></i></button>
+  <button class="nav-item flex flex-col items-center p-2 min-w-[60px]" data-view="profile"><i data-lucide="circle-user-round" class="w-5 h-5"></i><span class="text-[10px] mt-1 font-semibold">Profil</span><i class="nav-dot"></i></button>
+</nav>
+
+<div id="fullPlayer" class="hidden fixed inset-0 z-[200] bg-[#06070a]">
+  <img id="fullBg" class="full-bg"><div class="full-vignette"></div>
+  <div class="relative z-10 h-full flex flex-col p-4 pt-safe max-w-2xl mx-auto">
+    <div class="flex items-center justify-between">
+      <button id="closeFull" class="p-3 rounded-full bg-black/30"><i data-lucide="chevron-down"></i></button>
+      <div class="text-center"><div class="text-[9px] uppercase tracking-[.22em] text-white/45 font-bold">Sedang Diputar</div><div id="fullHeaderArtist" class="text-xs font-bold truncate max-w-[180px] mt-1"></div></div>
+      <button id="fullMore" class="p-3 rounded-full bg-black/30"><i data-lucide="more-vertical"></i></button>
+    </div>
+    <div class="flex-1 flex items-center justify-center min-h-0 py-5">
+      <div id="coverWrap" class="w-[82vw] max-w-[360px] aspect-square">
+        <img id="fullCover" class="w-full h-full object-cover rounded-2xl shadow-2xl border border-white/10">
+      </div>
+      <div id="lyricsWrap" class="hidden w-[82vw] max-w-[500px] h-[62vh] rounded-2xl glass p-5 overflow-hidden">
+        <div id="fullLyrics" class="h-full overflow-y-auto hide-scrollbar pb-24"></div>
+      </div>
+    </div>
+    <div class="pb-4">
+      <div class="flex justify-center mb-4"><div class="glass p-1 rounded-full"><button id="tabCover" class="px-4 py-1.5 rounded-full bg-white text-black text-xs font-bold">Cover</button><button id="tabLyrics" class="px-4 py-1.5 rounded-full text-white/60 text-xs font-bold">Lirik</button></div></div>
+      <div class="flex items-center gap-3"><div class="min-w-0 flex-1"><h2 id="fullTitle" class="text-xl font-black truncate"></h2><p id="fullArtist" class="text-sm text-white/55 truncate mt-1"></p></div><button id="fullLike" class="p-3 text-white/60"><i data-lucide="heart"></i></button></div>
+      <div class="mt-4 flex items-center gap-2 text-[10px] text-white/45"><span id="fullCurrent">0:00</span><input id="fullSeek" type="range" min="0" max="100" value="0" class="flex-1"><span id="fullTotal">0:00</span></div>
+      <div class="flex items-center justify-center gap-8 mt-5"><button id="prevBtn" class="p-3"><i data-lucide="skip-back"></i></button><button id="fullPlay" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center"><i data-lucide="play" class="fill-current"></i></button><button id="nextBtn" class="p-3"><i data-lucide="skip-forward"></i></button></div>
+    </div>
+  </div>
+</div>
+<audio id="audio" preload="metadata"></audio>
 <script src="/app.js"></script>
-</body></html>
+</body>
+</html>
