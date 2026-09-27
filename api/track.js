@@ -1,5 +1,5 @@
 const { findLyrics } = require("../lib/lrclib");
-const { getAudio } = require("../lib/spotsaver");
+const { getAudio } = require("../lib/downloader");
 
 function proxyUrl(req, source) {
   const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -8,53 +8,33 @@ function proxyUrl(req, source) {
 }
 
 module.exports = async (req, res) => {
-  if (req.method !== "GET") {
-    return res.status(405).json({ status: false, message: "Method not allowed" });
-  }
-
+  if (req.method !== "GET") return res.status(405).json({ status: false, message: "Method not allowed" });
   const url = String(req.query.url || "").trim();
-  const title = String(req.query.track || "").trim();
-  const artist = String(req.query.artist || "").trim();
-
-  if (!url && !title) {
-    return res.status(400).json({
-      status: false,
-      message: "url Spotify atau track wajib diisi."
-    });
+  if (!/^https:\/\/open\.spotify\.com\/track\/[A-Za-z0-9]+/i.test(url)) {
+    return res.status(400).json({ status: false, message: "URL Spotify track tidak valid." });
   }
 
   try {
-    let audio = null;
-    let trackName = title;
-    let artistName = artist;
-
-    if (url) {
-      audio = await getAudio(url);
-      trackName = audio.title;
-      artistName = audio.artist;
-      audio = {
-        ...audio,
-        direct_url: audio.download_url,
-        stream_url: proxyUrl(req, audio.download_url)
-      };
-    }
-
-    const lyrics = await findLyrics(trackName, artistName);
-
+    const audio = await getAudio(url);
+    const lyrics = await findLyrics(audio.title, audio.artist);
     return res.status(200).json({
       status: true,
       track: {
-        title: trackName,
-        artist: artistName,
-        spotify_url: url || null
+        title: audio.title,
+        artist: audio.artist,
+        album: audio.album,
+        duration: audio.duration,
+        thumbnail: audio.thumbnail,
+        spotify_url: url
       },
-      audio,
+      audio: {
+        ...audio,
+        direct_url: audio.download_url,
+        stream_url: proxyUrl(req, audio.download_url)
+      },
       lyrics
     });
   } catch (e) {
-    return res.status(502).json({
-      status: false,
-      message: e.message
-    });
+    return res.status(502).json({ status: false, message: e.message });
   }
 };
